@@ -47,6 +47,13 @@ vec_insert(struct Vec *vec, void* thing, int32_t index){
     }
 }
 
+void
+vec_delete(struct Vec *vec, int32_t index){
+    if (vec->used | 0){
+        memcpy(&vec->data[index * vec->type_size], &vec->data[(index + 1) * vec->type_size], vec->type_size *  (vec->used-- - index));
+    }
+}
+
 int
 main(){
     int cap = 10;
@@ -70,6 +77,14 @@ main(){
 
     int x = 44;
     vec_insert(&vec, &x, 9);
+
+    for (int i = 0; i < vec.capacity; ++i){
+        printf("%d\n", *((int*)vec.data + i));
+    }
+
+    printf("delete\n");
+
+    vec_delete(&vec,9);
 
     for (int i = 0; i < vec.capacity; ++i){
         printf("%d\n", *((int*)vec.data + i));
