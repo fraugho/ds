@@ -18,13 +18,13 @@ struct Arena* arena_new(int32_t cap){
 
 void*
 arena_alloc(struct Arena* arena, int32_t size){
-    if (arena->used + size <= arena->cap){
+    if (arena->used + size > arena->cap)[[clang::unlikely]]{
+        return NULL;
+    }
+    else{
         void *result = &arena->data[arena->used];
         arena->used += size;
         return result;
-    }
-    else{
-        return NULL;
     }
 }
 

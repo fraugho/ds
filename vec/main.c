@@ -3,15 +3,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct Vec{
+typedef struct Vec{
     int32_t capacity;
     int32_t used;
     char *data;
     char type_size;
-};
+} Vec;
 
 void
-vec_append(struct Vec *vec, void* thing){
+vec_append(Vec *vec, void* thing){
     if (vec->used < vec->capacity){
         memcpy(&vec->data[vec->used * vec->type_size], thing, vec->type_size);
         ++vec->used;
@@ -25,14 +25,14 @@ vec_append(struct Vec *vec, void* thing){
 }
 
 void
-vec_pop(struct Vec *vec, void* dest){
+vec_pop(Vec *vec, void* dest){
     if (vec->used | 0){
         memcpy(dest, &vec->data[--vec->used * vec->type_size], vec->type_size);
     }
 }
 
 void
-vec_insert(struct Vec *vec, void* thing, int32_t index){
+vec_insert(Vec *vec, void* thing, int32_t index){
     if (vec->used < vec->capacity){
         memcpy(&vec->data[(index + 1) * vec->type_size], &vec->data[index * vec->type_size], vec->type_size *  (vec->used - index));
         memcpy(&vec->data[index * vec->type_size], thing, vec->type_size);
@@ -48,7 +48,7 @@ vec_insert(struct Vec *vec, void* thing, int32_t index){
 }
 
 void
-vec_delete(struct Vec *vec, int32_t index){
+vec_delete(Vec *vec, int32_t index){
     if (vec->used | 0){
         memcpy(&vec->data[index * vec->type_size], &vec->data[(index + 1) * vec->type_size], vec->type_size *  (vec->used-- - index));
     }
@@ -57,7 +57,7 @@ vec_delete(struct Vec *vec, int32_t index){
 int
 main(){
     int cap = 10;
-    struct Vec vec = {cap, 0, malloc(cap * sizeof(int)), sizeof(int)};
+    Vec vec = {cap, 0, malloc(cap * sizeof(int)), sizeof(int)};
     for (int i = 0; i < vec.capacity; ++i){
         vec_append(&vec, &i);
     }
