@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <vec.h>
+#include "vec.h"
 
 typedef struct tree_node{
     struct tree_node *children;
@@ -39,7 +39,6 @@ main(){
     first->children[0].val = 2;
     first->children[0].children = malloc(sizeof(struct tree_node) * 2);
     first->children[0].num_children = 2;
-
 
     first->children[0].children[0].val = 4;
     first->children[0].children[0].num_children = 0;

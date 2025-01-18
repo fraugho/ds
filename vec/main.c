@@ -1,9 +1,8 @@
 #include <stdint.h>
 #include <stdio.h>
-#include <vec.h>
+#include "vec.h"
 
-int
-main(){
+int main(){
     int cap = 10;
     Vec vec = {cap, 0, malloc(cap * sizeof(int)), sizeof(int)};
     for (int i = 0; i < vec.capacity; ++i){
