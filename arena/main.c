@@ -1,55 +1,43 @@
+#include "arena.h"
 #include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 
-struct Arena{
-    int32_t used;
-    int32_t cap;
-    char *data;
-};
-
-struct Arena* arena_new(int32_t cap){
-    struct Arena* arena =  (struct Arena*)malloc(sizeof(struct Arena));
-    arena->data = malloc(cap);
-    arena->used = 0;
-    arena->cap = cap;
-    return arena;
-}
-
-void*
-arena_alloc(struct Arena* arena, int32_t size){
-    if (arena->used + size > arena->cap)[[clang::unlikely]]{
-        return NULL;
-    }
-    else{
-        void *result = &arena->data[arena->used];
-        arena->used += size;
-        return result;
-    }
-}
-
-struct Monster{
+typedef struct Monster{
     int32_t hp;
     int32_t atk;
-};
+} Monster;
 
-int
-main(){
-    struct Arena* bowl = arena_new(sizeof(struct Monster) * 3);
-    struct Monster* bill = (struct Monster*)arena_alloc(bowl, sizeof(struct Monster));
-    bill->hp = 1;
-    bill->atk = 2;
-    struct Monster* max = (struct Monster*)arena_alloc(bowl, sizeof(struct Monster));
-    max->hp = 3;
-    max->atk = 4;
-    struct Monster* lochness = (struct Monster*)arena_alloc(bowl, sizeof(struct Monster));
-    lochness->hp = 5;
-    lochness->atk = 6;
+void print_monster(Monster* m, uint32_t len){
+    for(int i = 0; i < len; ++i){
+        printf("Monster: %d, atk: %d, hp:%d\n", i, m[i].atk, m[i].hp);
+    }
+    printf("\n");
+}
 
-    printf("bill hp: %d atk: %d\n", bill->hp, bill->atk);
-    printf("max hp: %d atk: %d\n", max->hp, max->atk);
-    printf("lochness hp: %d atk: %d\n", lochness->hp, lochness->atk);
+int main(){
+    int num = 10;
+    Arena* arena = arena_new(num * sizeof(Monster));
+    Monster* m_1 = arena_alloc(arena, num * sizeof(Monster));
+    for(int i = 0; i < num; ++i){
+        m_1[i].atk = i;
+        m_1[i].hp = i + 1;
+    }
 
-    free(bowl->data);
-    free(bowl);
+    print_monster(m_1, num);
+
+    MultiPool* mp = multi_pool_new(num * sizeof(Monster));
+    Monster* m_2 = mp_arena_alloc(mp, num * sizeof(Monster));
+    for(int i = 0; i < num; ++i){
+        m_2[i].atk = i;
+        m_2[i].hp = i + 1;
+    }
+
+    print_monster(m_2, num);
+
+    Monster* m_3 = mp_arena_alloc(mp, num * sizeof(Monster));
+    for(int i = 0; i < num; ++i){
+        m_3[i].atk = i * 2;
+        m_3[i].hp = (i + 1) * 2;
+    }
+
+    print_monster(m_3, num);
 }
