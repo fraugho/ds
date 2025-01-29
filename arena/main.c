@@ -1,9 +1,11 @@
 #include "arena.h"
 #include <stdint.h>
+#include <time.h>
 
 typedef struct Monster{
     int32_t hp;
     int32_t atk;
+    char* name;
 } Monster;
 
 void print_monster(Monster* m, uint32_t len){
@@ -13,7 +15,68 @@ void print_monster(Monster* m, uint32_t len){
     printf("\n");
 }
 
+void delete_monster(Monster* m){
+    free(m->name);
+    free(m);
+}
+
+void reg_allocate(uint8_t num){
+    char name_len = 8;
+    Monster* m = malloc(num * (sizeof(Monster) + name_len));
+    for(int i = 0; i < num; ++i){
+        m[i].atk = i;
+        m[i].hp = i + 1;
+        m[i].name = malloc(name_len);
+        m[i].name = "bob_mar\0";
+    }
+
+    print_monster(m, num);
+
+    for(int i = 0; i < num; ++i){
+        free(m[i].name);
+    }
+    free(m);
+}
+
+void arena_allocate(uint8_t num){
+    char name_len = 8;
+    Arena* a = arena_new(num * (sizeof(Monster) + name_len));
+    Monster* m = arena_alloc(a, num * (sizeof(Monster) + name_len));
+
+    for(int i = 0; i < num; ++i){
+        m[i].atk = i;
+        m[i].hp = i + 1;
+        m[i].name = "bob_mar\0";
+    }
+
+    print_monster(m, num);
+
+    free_arena(a);
+}
+
+void mp_allocate(uint8_t num){
+    char name_len = 8;
+    MultiPool* mp = multi_pool_new(num * (sizeof(Monster) + name_len));
+    Monster* m = mp_arena_alloc(mp, num * (sizeof(Monster) + name_len));
+
+    for(int i = 0; i < num; ++i){
+        m[i].atk = i;
+        m[i].hp = i + 1;
+        m[i].name = "bob_mar\0";
+    }
+
+    print_monster(m, num);
+
+    free_pool(mp);
+}
+
 int main(){
+    reg_allocate(10);
+    arena_allocate(10);
+    mp_allocate(10);
+}
+
+/*  
     int num = 10;
     Arena* arena = arena_new(num * sizeof(Monster));
     Monster* m_1 = arena_alloc(arena, num * sizeof(Monster));
@@ -23,6 +86,8 @@ int main(){
     }
 
     print_monster(m_1, num);
+
+    free(arena);
 
     MultiPool* mp = multi_pool_new(num * sizeof(Monster));
     Monster* m_2 = mp_arena_alloc(mp, num * sizeof(Monster));
@@ -40,4 +105,6 @@ int main(){
     }
 
     print_monster(m_3, num);
-}
+    free(mp);
+
+*/
