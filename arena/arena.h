@@ -31,6 +31,11 @@ void* arena_alloc(Arena* arena, uint32_t size){
     }
 }
 
+static inline void free_arena(Arena* a){
+    free(a->data);
+    free(a);
+}
+
 typedef struct MPArena{
     uint32_t used;
     char *data;
@@ -69,5 +74,12 @@ void* mp_arena_alloc(MultiPool* mp, uint32_t size){
         mp->pools[mp->cur_pool].used += size;
         return result;
     }
+}
+
+void free_pool(MultiPool* mp){
+    for(int i = 0; i < mp->num_pool; ++i){
+        free(mp->pools[i].data);
+    }
+    free(mp->pools);
 }
 #endif
