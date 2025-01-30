@@ -1,5 +1,6 @@
 #include "arena.h"
 #include <stdint.h>
+#include <string.h>
 #include <time.h>
 
 typedef struct Monster{
@@ -10,7 +11,7 @@ typedef struct Monster{
 
 void print_monster(Monster* m, uint32_t len){
     for(int i = 0; i < len; ++i){
-        printf("Monster: %d, atk: %d, hp:%d\n", i, m[i].atk, m[i].hp);
+        printf("Monster: %d, atk: %d, hp: %d, name: %s\n", i, m[i].atk, m[i].hp, m[i].name);
     }
     printf("\n");
 }
@@ -27,7 +28,7 @@ void reg_allocate(uint8_t num){
         m[i].atk = i;
         m[i].hp = i + 1;
         m[i].name = malloc(name_len);
-        m[i].name = "bob_mar\0";
+        strcpy(m[i].name, "bob_mar");
     }
 
     print_monster(m, num);
@@ -41,12 +42,13 @@ void reg_allocate(uint8_t num){
 void arena_allocate(uint8_t num){
     char name_len = 8;
     Arena* a = arena_new(num * (sizeof(Monster) + name_len));
-    Monster* m = arena_alloc(a, num * (sizeof(Monster) + name_len));
+    Monster* m = arena_alloc(a, num * sizeof(Monster));
 
     for(int i = 0; i < num; ++i){
         m[i].atk = i;
         m[i].hp = i + 1;
-        m[i].name = "bob_mar\0";
+        m[i].name = arena_alloc(a, name_len);
+        strcpy(m[i].name, "bob_mar");
     }
 
     print_monster(m, num);
@@ -57,12 +59,13 @@ void arena_allocate(uint8_t num){
 void mp_allocate(uint8_t num){
     char name_len = 8;
     MultiPool* mp = multi_pool_new(num * (sizeof(Monster) + name_len));
-    Monster* m = mp_arena_alloc(mp, num * (sizeof(Monster) + name_len));
+    Monster* m = mp_arena_alloc(mp, num * sizeof(Monster));
 
     for(int i = 0; i < num; ++i){
         m[i].atk = i;
         m[i].hp = i + 1;
-        m[i].name = "bob_mar\0";
+        m[i].name = mp_arena_alloc(mp, name_len);
+        strcpy(m[i].name, "bob_mar");
     }
 
     print_monster(m, num);

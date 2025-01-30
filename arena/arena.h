@@ -21,7 +21,7 @@ Arena* arena_new(uint32_t cap){
 }
 
 void* arena_alloc(Arena* arena, uint32_t size){
-    if (arena->used + size > arena->cap)[[clang::unlikely]]{
+    if (arena->used + size > arena->cap){
         return NULL;
     }
     else{
