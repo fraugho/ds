@@ -1,10 +1,18 @@
 #include "matrix.h"
+#include <stdint.h>
+
+typedef struct Matrix{
+    uint32_t col;
+    uint32_t row;
+    void**restrict data;
+    uint8_t data_type;
+} Matrix;
 
 int main(){
-    int a_rows = 1024, a_cols = 1024;
+    int a_rows = 1, a_cols = 3;
     int** a = matrix_alloc(a_rows, a_cols, sizeof(int));
 
-    int b_rows = 1024, b_cols = 1024;
+    int b_rows = 3, b_cols = 2;
     int** b = matrix_alloc(b_rows, b_cols, sizeof(int));
 
     for (int i = 0; i < a_rows; ++i){
@@ -22,9 +30,9 @@ int main(){
     int** c = matrix_mul(a, b, a_rows, a_cols, b_rows, b_cols);
 
     for (int i = 0; i < a_rows; ++i){
-        //printf("row: ");
+        printf("row: ");
         for (int j = 0; j < b_cols; ++j){
-            //printf("%d ", c[i][j]);
+            printf("%d ", c[i][j]);
         }
         printf("\n");
     }

@@ -22,20 +22,10 @@ int** matrix_dealloc(int** matrix, int rows, int cols){
     return matrix;
 }
 
-int** matrix_mul(const int **restrict a, const int **restrict b,
+int** matrix_mul(int **restrict a, int **restrict b,
         const int a_rows, const int a_cols, const int b_rows, const int b_cols) {
     if (a_cols == b_rows){
         int** c = matrix_alloc(a_rows, b_cols, sizeof(int));
-        /*
-        for(int i = 0; i < a_rows; ++i){
-            for(int j = 0; j < b_cols; ++j){
-                for(int k = 0; k < b_rows; ++k){
-                    c[i][j] += a[i][k] * b[k][i];
-                }
-            }
-        }
-
-         * */
         for(int i = 0; i < a_rows; ++i){
             for(int j = 0; j < a_cols; ++j){
                 for(int k = 0; k < b_cols; ++k){
