@@ -1,13 +1,24 @@
 #!/bin/bash
 
 echo "lin"
-g++ -msse4 lin.cpp -o m
+g++ -g -march=x86-64-v4 -mavx512f lin.cpp -o m
+#g++ -msse4 lin.cpp -o m
 perf stat -d ./m
 
 echo "lib"
-g++ lib.cpp -o m
+g++ -g -march=x86-64-v4 -mavx512f lib.cpp -o m
+#g++ lib.cpp -o m
 perf stat -d ./m
 
 echo "128 simd"
-g++ -msse4.1 main.cpp -o m
+#g++ -msse4.1 128.cpp -o m
+g++ -g -march=x86-64-v4 -mavx512f 128.cpp -o m
+perf stat -d ./m
+
+echo "duck"
+g++ -g -march=x86-64-v4 -mavx512f duck.cpp -o m
+perf stat -d ./m
+
+echo "512 simd"
+g++ -g -march=x86-64-v4 -mavx512f 512.cpp -o m
 perf stat -d ./m

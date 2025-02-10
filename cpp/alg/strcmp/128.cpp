@@ -1,9 +1,9 @@
 #include <iostream>
 #include "strcmp.hpp"
 
-
 int main(){
-    const size_t len = 1024576;
+    const size_t len = 64 * 64 * 64 * 4 + 1;
+    //const size_t len = 1024576;
 
     std::string a;
     a.reserve(len);

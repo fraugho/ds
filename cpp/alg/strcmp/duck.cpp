@@ -4,14 +4,15 @@
 
 
 int main(){
-    const size_t len = 64 * 64 * 64 * 4;
+    const size_t len = 64 * 64 * 64 * 4 ;
 
     alignas(64) char a[len] = {'c'};
     a[1] = 'b';
 
     alignas(64) char b[len] = {'c'};
 
-    size_t result = simd512_strcmp(a, b, len);
+    size_t result = duck(a, b, len);
+
     if (result){
         std::cout << "true\n";
     } else {
