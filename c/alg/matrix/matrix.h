@@ -22,7 +22,7 @@ int** matrix_dealloc(int** matrix, int rows, int cols){
     return matrix;
 }
 
-int** matrix_mul(int **restrict a, int **restrict b,
+int** matrix_mul(int **const restrict a, int ** const restrict b,
         const int a_rows, const int a_cols, const int b_rows, const int b_cols) {
     if (a_cols == b_rows){
         int** c = matrix_alloc(a_rows, b_cols, sizeof(int));
