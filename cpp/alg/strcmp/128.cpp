@@ -1,20 +1,14 @@
 #include <iostream>
 #include "strcmp.hpp"
+#include <cstring>
 
 int main(){
-    const size_t len = 64 * 64 * 64 * 4 + 1;
-    //const size_t len = 1024576;
+    const size_t len = 64 * 64 * 64 * 4;
 
-    std::string a;
-    a.reserve(len);
+    std::string a(len, 'c');
+    a[1] = 'b';
 
-    std::string b;
-    b.reserve(len);
-
-    for (int i = 0; i < len; i+=16){
-        a.append("cccccccccccccccc");
-        b.append("cccccccccccccccc");
-    }
+    std::string b(len, 'c');
 
     std::cout << simd_strcmp(a, b) << "\n";
 }
