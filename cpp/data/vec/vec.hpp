@@ -1,6 +1,7 @@
-#ifndef VEC_H
-#define VEC_H
+#ifndef VEC_HPP
+#define VEC_HPP
 
+#include <iostream>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -18,8 +19,14 @@ class Vec {
             used = 0;
             cap = 10;
         }
+        Vec(const Vec& other) {
+            cap = other.cap;
+            used = other.used;
+            data = new T[cap];
+            memcpy(data, other.data, used * sizeof(T));
+        }
 
-        Vec(uint32_t size){
+        Vec(int64_t size){
             data = new T[size];
             used = 0;
             cap = size;
@@ -29,11 +36,54 @@ class Vec {
             delete[] data;
         }
 
-        T& operator[](uint32_t index){
+        Vec& operator=(const Vec& other) {
+            if (this != &other) {
+                delete[] data;
+                cap = other.cap;
+                used = other.used;
+                data = new T[cap];
+                memcpy(data, other.data, used * sizeof(T));
+            }
+            return *this;
+        }
+
+        Vec& operator=(Vec&& other) noexcept {
+            if (this != &other) {
+                delete[] data;
+                cap = other.cap;
+                used = other.used;
+                data = other.data;
+                other.data = nullptr;
+            }
+            return *this;
+        }
+
+        Vec operator+(const Vec& vec) const {
+            Vec new_vec((vec.used + used) * 2);
+            try {
+                memcpy(new_vec.data, data, used * sizeof(T));
+                memcpy(&new_vec.data[used], vec.data, vec.used * sizeof(T));
+                new_vec.used = vec.used + used;
+            } catch (...) {
+                delete[] new_vec.data;
+                throw;
+            }
+            return new_vec;
+        }
+
+        Vec<T> operator+(Vec<T> vec){
+            Vec<T> new_vec((vec.used + used) * 2);
+            memcpy(new_vec.data, data, used * sizeof(T));
+            memcpy(&new_vec.data[used], vec.data, vec.used * sizeof(T));
+            new_vec.used = vec.used + used;
+            return new_vec;
+        }
+
+        T& operator[](uint64_t index){
             return data[index];
         }
 
-        const T& operator[](uint32_t index) const {
+        const T& operator[](uint64_t index) const {
             return data[index];
         }
 
@@ -41,7 +91,7 @@ class Vec {
             if(used < cap){
                 data[used++] = value;
             } else{
-                realloc(data, (cap * sizeof(T) * 2));
+                data = (T*)realloc(data, (cap * sizeof(T) * 2));
                 data[used++] = value;
             }
         }
@@ -59,7 +109,21 @@ class Vec {
             data[index] = value;
         }
 
-        uint32_t get_end(){
+        T get_last(){
+            return data[used - 1];
+        }
+
+        void print(){
+            for(uint64_t i = 0; i < used; ++i){
+                std::cout << "index " << i << ": " << data[i] << "\n";
+            }
+        }
+
+        const uint64_t len() const{
+            return used;
+        }
+
+        uint64_t len(){
             return used;
         }
 };
