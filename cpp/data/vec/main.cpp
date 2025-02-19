@@ -19,7 +19,7 @@ int main(){
     for(int i = 0; i < 2; ++i){
         b.append(i);
     }
-    Vec<int> c = a + b;
+    Vec<int> c = std::move(a + b);
     c.print();
 
     return 0;
