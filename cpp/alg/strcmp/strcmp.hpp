@@ -64,16 +64,46 @@ bool simd512_strcmp(char* a, char* b, size_t len){
     return true;
 }
 
+[[nodiscard]]
+bool simd512_strcmp_ptr(char* a, char* b, size_t len){
+    __m512i* x = (__m512i*)a;
+    __m512i* y = (__m512i*)b;
+    __mmask64 mask;
+    //len % 64
+    size_t remainder = len & 0x0000003F;
+
+    for(;len >= 64; len -= 64){
+        mask = _mm512_cmpeq_epi8_mask(*x, *y);
+        // If the mask is not all ones, it means there's a difference
+        if (mask != 0xFFFFFFFFFFFFFFFF){
+            return false;
+        }
+        ++x;
+        ++y;
+    }
+
+    for(int i = 0; i < remainder; ++i){
+        if (a[len - (i + 1)] != b[len - (i + 1)]){
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool duck(char* a, char* b, size_t len){
     __m512i x;
     __m512i y;
     __mmask64 mask;
 
+    size_t remaining = 0;
+    size_t j = 0;
     for(int i = 0; i < len; i += 64){
-        size_t remaining = len - i;
+        remaining = len - i;
         if (remaining < 64){
+        //if (remaining & 0x0000003F){
             // Handle remaining bytes
-            for (size_t j = 0; j < remaining; j++){
+            for (j = 0; j < remaining; j++){
                 if (a[i + j] != b[i + j]){
                     return false;
                 }
@@ -87,7 +117,7 @@ bool duck(char* a, char* b, size_t len){
         mask = _mm512_cmpeq_epi8_mask(x, y);
         if (mask != 0xFFFFFFFFFFFFFFFF){
             // If the mask is not all ones, it means there's a difference
-            for (int j = 0; j < 64; j++){
+            for (j = 0; j < 64; j++){
                 if (a[i + j] != b[i + j]){
                     return false;
                 }

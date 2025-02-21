@@ -1,0 +1,30 @@
+#include <iostream>
+#include "strcmp.hpp"
+#include <cstring>
+#include <chrono>
+
+
+int main(){
+    const size_t len = 64 * 64 * 64 * 4;
+
+    alignas(64) char a[len] = {'c'};
+    //a[1] = 'b';
+
+    alignas(64) char b[len] = {'c'};
+
+    auto start = std::chrono::high_resolution_clock::now();
+    size_t result = duck(a, b, len);
+    auto end = std::chrono::high_resolution_clock::now();
+
+    if (result){
+        std::cout << "true\n";
+    } else {
+        std::cout << "false\n";
+    }
+
+    std::cout <<  "result: " << result << "\n";
+
+    std::cout << "Duration: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() << " ns\n";
+
+    return 0;
+}
