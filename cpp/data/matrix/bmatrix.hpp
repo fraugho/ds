@@ -84,7 +84,7 @@ class Matrix{
                         }
                     }
                 }
-                return c;
+                return std::move(c);
             }
             else {
                 std::cout << "matrices not compatible\n";

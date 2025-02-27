@@ -1,9 +1,5 @@
 #!/bin/bash
 
-echo "lin"
-g++ -g -march=x86-64-v4 -mavx512f lin.cpp -o m
-#g++ -msse4 lin.cpp -o m
-perf stat -d ./m
 
 echo "lib"
 g++ -g -O2 -march=x86-64-v4 -mavx512f lib.cpp -o m
@@ -26,3 +22,12 @@ perf stat -d ./m 10000
 echo "512 simd ptr"
 g++ -g -O2 -march=x86-64-v4 -mavx512f 512ptr.cpp -o m
 perf stat -d ./m 10000
+
+echo "par"
+g++ -g -O2 -march=x86-64-v4 -mavx512f par.cpp -o m
+perf stat -d ./m 10000
+
+echo "lin"
+g++ -g -O2 -march=x86-64-v4 -mavx512f lin.cpp -o m
+#g++ -msse4 lin.cpp -o m
+#perf stat -d ./m 10000

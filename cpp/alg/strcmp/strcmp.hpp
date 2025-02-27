@@ -2,6 +2,7 @@
 #define STRCMP_HPP
 
 #include <iostream>
+#include <omp.h>
 #include <immintrin.h>
 
 [[nodiscard]]
@@ -37,7 +38,7 @@ bool simd_strcmp(std::string a, std::string b){
 }
 
 [[nodiscard]]
-bool simd512_strcmp(char* a, char* b, size_t len){
+bool simd512_strcmp(char* __restrict__ a, char* __restrict__ b, size_t len){
     __m512i x;
     __m512i y;
     __mmask64 mask;
@@ -65,7 +66,7 @@ bool simd512_strcmp(char* a, char* b, size_t len){
 }
 
 [[nodiscard]]
-bool simd512_strcmp_ptr(char* a, char* b, size_t len){
+bool simd512_strcmp_ptr(char* __restrict__ a, char* __restrict__ b, size_t len){
     __m512i* x = (__m512i*)a;
     __m512i* y = (__m512i*)b;
     __mmask64 mask;
@@ -91,7 +92,34 @@ bool simd512_strcmp_ptr(char* a, char* b, size_t len){
     return true;
 }
 
-bool duck(char* a, char* b, size_t len){
+[[nodiscard]]
+bool simd512_par_strcmp_ptr(char* a, char* b, size_t len){
+    __m512i* x = (__m512i*)a;
+    __m512i* y = (__m512i*)b;
+    __mmask64 mask;
+    //len % 64
+    size_t remainder = len & 0x0000003F;
+
+    for(;len >= 64; len -= 64){
+        mask = _mm512_cmpeq_epi8_mask(*x, *y);
+        // If the mask is not all ones, it means there's a difference
+        if (mask != 0xFFFFFFFFFFFFFFFF){
+            return false;
+        }
+        ++x;
+        ++y;
+    }
+
+    for(int i = 0; i < remainder; ++i){
+        if (a[len - (i + 1)] != b[len - (i + 1)]){
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool duck(char* __restrict__ a, char* __restrict__ b, size_t len){
     __m512i x;
     __m512i y;
     __mmask64 mask;
@@ -150,6 +178,29 @@ void test2(char* a, char* b){
 [[nodiscard]]
 bool strcmp(std::string a, std::string b){
     int len = a.length();
+    for(int i = 0; i < len; ++i){
+        if(a[i] != b[i]){
+            return false;
+        }
+    }
+
+    return true;
+}
+
+[[nodiscard]]
+bool lin_strcmp(char* a, char* b, size_t len){
+    for(int i = 0; i < len; ++i){
+        if(a[i] != b[i]){
+            return false;
+        }
+    }
+
+    return true;
+}
+
+[[nodiscard]]
+bool par_lin_strcmp(char* __restrict__ a, char* __restrict__ b, size_t len){
+    #pragma omp parallel for
     for(int i = 0; i < len; ++i){
         if(a[i] != b[i]){
             return false;

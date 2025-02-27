@@ -55,14 +55,30 @@ void thread_sum(const ThreadInfo ti){
     return;
 }
 
+void thread_sum_simd(const ThreadInfo ti){
+    uint64_t start = ti.work_num * ti.thread_num;
+    uint64_t end = start + ti.work_num;
+
+    __m512i x = _mm512_set_epi64(start, start + 1, start + 2, start + 3, start + 4, start +5, start + 6, start + 7);
+    __m512i y = _mm512_set1_epi64(8);
+
+    for (;start < end; start += 8) {
+        ti.result[ti.thread_num] += _mm512_reduce_add_epi64(x);
+        x = _mm512_add_epi64(x, y);
+    }
+
+    return;
+}
+
 uint64_t thread_par(uint64_t n) 
 { 
-    int tc = 24;
+    int tc = 12;
     uint64_t sum = 0;
-    uint64_t sumarr[24] = {0};
+    uint64_t sumarr[12] = {0};
     std::thread threads[tc];
     for(int i = 0; i < tc; ++i){
-        threads[i] = std::thread(thread_sum, ThreadInfo{n/tc, i, sumarr});
+        //threads[i] = std::thread(thread_sum, ThreadInfo{n/tc, i, sumarr});
+        threads[i] = std::thread(thread_sum_simd, ThreadInfo{n/tc, i, sumarr});
     }
     for(auto& thread : threads){
         thread.join();
@@ -76,7 +92,7 @@ uint64_t thread_par(uint64_t n)
 // Driver Function 
 int main() 
 { 
-    const uint64_t n = 64 * 64 * 64 * 4; 
+    const uint64_t n = 4096 * 4096 * 64; 
 
     auto start_time = std::chrono::high_resolution_clock::now(); 
     uint64_t result_serial = sum_serial(n); 
@@ -112,8 +128,6 @@ int main()
     std::cout << "Parallel duration: "<< parallel_duration.count() << " seconds" << "\n"; 
     std::cout << "Thread duration: "<< thread_duration.count() << " seconds" << "\n"; 
     std::cout << "Simd duration: "<< simd_duration.count() << " seconds" << "\n"; 
-
-    std::cout << "Speedup: " << serial_duration.count() / parallel_duration.count() << "\n"; 
 
     return 0; 
 }

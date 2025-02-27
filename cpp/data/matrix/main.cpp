@@ -19,17 +19,9 @@ int main(){
         }
     }
 
-    Matrix<int> C = A * 2;
+    Matrix<int> C = A * B;
     C.print_matrix();
-
-    /*
-    Matrix<int>* C = matrix_mul<int>(&A, &B);
-    std::cout << "C matrix\n";
-    C->print_matrix();
-    delete C;
-     * */
-
-
+    return 0;
 
     int d_rows = 3, d_cols = 3;
     Matrix<int> D(d_rows,d_cols);
@@ -44,4 +36,5 @@ int main(){
     std::cout << "D matrix\n";
     E->print_matrix();
     delete E;
+    return 0;
 }
