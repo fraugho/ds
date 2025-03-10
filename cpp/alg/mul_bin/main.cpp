@@ -64,7 +64,7 @@ int arr[12] = {5, 1, 1, 5, 1, 1, 5, 1, 1, 5, 1, 1};
     std::cout << "before\n";
     print_array(arr, 12);
     std::cout << "after\n";
-    std::cout << mt_search(arr, len, tc, 5) << "\n";
+    std::cout << mt_search(arr, len, tc, 6) << "\n";   
     print_array(arr, 12);
 }
 
@@ -234,13 +234,21 @@ bool mt_search(int* arr, int len, const int tc, int key){
     int idle = 0;
     int times = 0;
     while(idle < tc && !FOUND){
+        idle = 0;
         for(i = 0; i < tc; ++i){
             if(ts[i].done){
                 if (ts[i].is_in){
                     ts[i].end = (ts[i].start + (ts[i].end - 1))/ 2;
                     ts[i].is_in = false;
-                    ts[i].done = false;
+                    if(ts[i].start - ts[i].end != 0){
+                        ts[i].done = false;
+                    } else{
+                        ts[i].is_in = false;
+                    }
+                    if((ts[i].start + (ts[i].end - 1))/ 2-  ts[i].end != 0){
                     work.push_back({(ts[i].start + (ts[i].end - 1))/ 2, ts[i].end});
+
+                    }
                 } else{
                     if(!work.empty()){
                         ToDo todo = work.back();
