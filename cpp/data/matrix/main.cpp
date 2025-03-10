@@ -40,7 +40,7 @@ int main(){
     Matrix<int> F(3, 1);
     F.data[0][0] = 1;
     F.data[1][0] = 1;
-    F.data[2][0] = 0;
+    F.data[2][0] = 1;
     std::cout << "F\n";
     F.print_matrix();
     Matrix<int>* G = ddd_to_dd(&F);

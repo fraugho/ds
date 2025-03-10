@@ -1,5 +1,5 @@
-#ifndef MATRIX_H
-#define MATRIX_H
+#ifndef MATRIX_HPP
+#define MATRIX_HPP
 
 #include <iostream>
 #include <cstdint>
@@ -84,21 +84,10 @@ class Matrix{
         }
 
         Matrix<T>(Matrix<T>&t){
-            //swap(this, &t);
             cols = t.cols;
             rows = t.rows;
             data = t.data;
             t.data = nullptr;
-        }
-        void fi(Matrix<T>* t){
-
-        }
-
-        void swap(Matrix<T>* a, Matrix<T>* b){
-            Matrix<T>* temp = a;
-            b->data = nullptr;
-            a = b;
-            b = a;
         }
 
         Matrix<T> operator*(Matrix b){
