@@ -2,6 +2,7 @@
 #include <thread>
 #include <stdlib.h>
 #include <vector>
+#include <random>
 #include "vec.hpp"
 
 #define not_in -1
@@ -9,6 +10,7 @@
 #define found 1
 
 
+bool RUNNING = true;
 typedef struct ThreadInfo{
     int* arr;
     int start;
@@ -32,10 +34,10 @@ void print_array(int* arr, int len);
 void mswap(int* arr, Work w);
 void thread_task(Work w, int* result, int tn);
 bool mt_search(int* arr, int len, const int tc, int key);
-
-int arr[12] = {5, 1, 1, 5, 1, 1, 5, 1, 1, 5, 1, 1};
+void rand_arr(int* arr, int len, int uniqueValue);
 
 int main(){
+int arr[12] = {5, 1, 1, 5, 1, 1, 5, 1, 1, 5, 1, 1};
     int a[5] = {5,1,0,2, 4};
     swap(a, 0, 4);
     print_array(a, 5);
@@ -57,7 +59,20 @@ int main(){
         thread.join();
     }
     print_array(arr, 12);
-    std::cout << mt_search(arr, len, tc, 5);
+    std::cout << mt_search(arr, len, tc, 5) << "\n";
+    rand_arr(arr, len, 5);
+    std::cout << "before\n";
+    print_array(arr, 12);
+    std::cout << "after\n";
+    std::cout << mt_search(arr, len, tc, 5) << "\n";
+    print_array(arr, 12);
+}
+
+void rand_arr(int* arr, int len, int uniqueValue) {
+    for(int i = 0; i < len; ++i){
+        arr[i] = uniqueValue - (std::rand() % uniqueValue + 1);
+    }
+    arr[0] = uniqueValue;
 }
 
 void mswap(Work w){
@@ -95,7 +110,7 @@ void sub_search(SubWork w){
     for (int i = 0; i < w.tc; ++i) {
         start = prev;
         end = prev + step;
-        w.w[i] = {start, end, arr, w.key, 0,  w.is_found};
+        //w.w[i] = {start, end, arr, w.key, 0,  w.is_found};
         //threads[i] = std::thread(thread_task, w[i];
         prev = end + 1;
     }
@@ -158,7 +173,6 @@ bool multithreaded_search(int* arr, int len, const int tc, int key){
     return false;
 }
 
-bool RUNNING = true;
 typedef struct ThreadState{
     int* arr;
     int key;
@@ -168,6 +182,7 @@ typedef struct ThreadState{
     int end;
     bool is_in;
 } ThreadState;
+
 void tswap(ThreadState s){
     for(;s.start < s.end; ++s.start){
         if(s.arr[s.start] > s.arr[s.start + 1]){
@@ -176,18 +191,22 @@ void tswap(ThreadState s){
             s.arr[s.start + 1] = temp;
         }
     }
+    std::cout << "did\n";
 }
+
 void thread_work(ThreadState* state){
     while (RUNNING){
         if(state->done){
             continue;
         } else{
             tswap(*state);
+            //swap(state->arr, state->start, state->end);
             if(state->arr[state->end] == state->key){
                 *state->FOUND = true;
                 return;
             }
             state->is_in = state->arr[state->end] > state->key ? in : not_in;
+            state->done = true;
         }
     }
 }
@@ -201,6 +220,7 @@ bool mt_search(int* arr, int len, const int tc, int key){
     std::thread threads[tc];
     ThreadState ts[tc];
     bool FOUND;
+    RUNNING = true;
     int i, start, end, prev = 0;
     int step = (len - 1)/ tc;
     for (i = 0; i < tc; ++i) {
@@ -212,6 +232,7 @@ bool mt_search(int* arr, int len, const int tc, int key){
     }
     std::vector<ToDo> work;
     int idle = 0;
+    int times = 0;
     while(idle < tc && !FOUND){
         for(i = 0; i < tc; ++i){
             if(ts[i].done){
@@ -231,6 +252,10 @@ bool mt_search(int* arr, int len, const int tc, int key){
                         ++idle;
                     }
                 }
+            }
+            if(times < 10){
+                print_array(arr, 12);
+                ++times;
             }
         }
     }
