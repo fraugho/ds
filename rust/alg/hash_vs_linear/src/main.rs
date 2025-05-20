@@ -12,8 +12,7 @@ fn main() {
         .collect();
     //let arrdict = vec!["youtube", "youtube-music", "soundcloud","bandcamp","piped", "spotify", "thing", "think", "placeholder", "windows"];
     let tests: Vec<String> = (0..100000)
-        .map(|x| arrdict[x % arrdict
-            .len()]
+        .map(|x| arrdict[x % arrdict.len()]
             .to_string())
         .collect();
 
@@ -21,7 +20,8 @@ fn main() {
     for _ in 0..times{
         let _: Vec<bool> = tests
             .iter()
-            .map(|x| arrdict
+            .map(|x| 
+                arrdict
                 .iter()
                 .any(|y| x == y))
             .collect();
@@ -31,6 +31,7 @@ fn main() {
     println!("Linear Check:{}", elasped.as_micros() / times);
 
     let hashset: HashSet<String> = HashSet::from_iter(arrdict.iter().cloned());
+
     start = Instant::now();
     for _ in 0..times{
         let _: Vec<bool> = tests
@@ -40,7 +41,7 @@ fn main() {
             .collect();
     }
     end = Instant::now();
+
     elasped = end - start;
     println!("Hashset Check:{}", elasped.as_micros() / times);
 }
-

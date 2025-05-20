@@ -6,7 +6,7 @@
 //#include <immintrin.h>
 #include <smmintrin.h>
 
-[[nodiscard]] bool palindrome(std::string s){
+[[nodiscard]] bool palindrome(std::string& s){
     size_t len = s.length();
     std::cout << "len: " << len << "\n";
     for(int i = 0; i < len / 2; ++i){
@@ -17,7 +17,7 @@
     return true;
 }
 
-char* reverse_string(std::string s){
+char* reverse_string(std::string& s){
     int len = s.length();
     char* rev = new char[len];
     for(int i = 0; i < len; ++i){
@@ -27,7 +27,7 @@ char* reverse_string(std::string s){
     return rev;
 }
 
-[[nodiscard]] bool simd_palindrome(std::string s){
+[[nodiscard]] bool simd_palindrome(std::string& s){
     char a[16] = {0};
     char b[16] = {0};
     int len = s.length();

@@ -1,34 +1,8 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include "vec.h"
-
-typedef struct tree_node{
-    struct tree_node *children;
-    char val;
-    int32_t num_children;
-} tree_node;
+#include "tree.h"
 
 
-typedef struct Tree{
-    struct tree_node *head;
-} Tree;
-
-void
-dfs(Tree* tree){
-    tree_node *cur = malloc(sizeof(tree_node));
-    Vec stack = {7, 0, malloc(sizeof(tree_node) * 7), sizeof(tree_node)};
-    vec_append(&stack, tree->head);
-    while (!vec_is_empty(&stack)){
-        vec_pop(&stack, cur);
-        printf("%d\n", cur->val);
-        for (int i = 0; i < cur->num_children; ++i){
-            vec_append(&stack, &cur->children[i]);
-        }
-    }
-}
-
-int
-main(){
+int main(){
     tree_node *first = malloc(sizeof(struct tree_node));
     first->children = malloc(sizeof(struct tree_node) * 2);
     first->val = 1;
