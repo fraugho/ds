@@ -7,21 +7,21 @@
 
 class BloomFilter{
     private:
-        u64* data;
-        u64 len;
+        u8* data;
+        u8 len;
     public:
         BloomFilter(u64 l){
             len = l;
-            data = new u64[(l / 64) + 1];
+            data = new u8[(l / 8) + 1];
         }
         ~BloomFilter(){
             delete data;
         }
         void insert(u64 num){
             for(u64 hash: hash(num)){
-                //it first gets which u64 hash bit is in then
-                //does a mod 64 to turn hash bit position to binary
-                data[hash / len] |= 0x8000000000000000 >> (hash & 0x3fffffffffffffff);
+                //it first gets which u8 hash bit is in then
+                //does a mod 8 to turn hash bit position to binary
+                data[hash / 8] |= 0x80 >> (hash & 0x03);
             }
         }
         std::array<u64, 3> hash(u64 num){
@@ -29,7 +29,7 @@ class BloomFilter{
         }
         bool is_there(u64 num){
             for(u64 hash: hash(num)){
-                if (!(data[hash / len] & 0x8000000000000000 >> (hash & 0x3fffffffffffffff))){
+                if (!(data[hash / 8] & 0x80 >> (hash & 0x03))){
                     return false;
                 }
             }
