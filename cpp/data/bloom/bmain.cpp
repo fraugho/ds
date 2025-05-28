@@ -1,5 +1,5 @@
 #include <iostream>
-#include "bitbloom.hpp"
+#include "bloom.hpp"
 
 int main(){
     BloomFilter bloom = BloomFilter(10);
