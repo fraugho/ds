@@ -10,9 +10,9 @@ class BloomFilter{
         bool* data;
         i32 len;
     public:
-        BloomFilter(i32 l){
-            len = l;
-            data = new bool[l];
+        BloomFilter(i32 len){
+            this->len = len;
+            data = new bool[len];
         }
         ~BloomFilter(){
             delete data;

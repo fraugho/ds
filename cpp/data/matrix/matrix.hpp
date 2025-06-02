@@ -23,9 +23,9 @@ class Matrix{
         uint32_t rows;
         T** data;
 
-        Matrix(uint32_t r, uint32_t c){
-            rows = r;
-            cols = c;
+        Matrix(uint32_t rows, uint32_t cols){
+            this->rows = rows;
+            this->cols = cols;
             data = raw_matrix_alloc<T>(rows, cols);
         };
 

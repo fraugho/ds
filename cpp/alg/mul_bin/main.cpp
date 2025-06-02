@@ -9,7 +9,6 @@
 #define in 0
 #define found 1
 
-
 bool RUNNING = true;
 typedef struct ThreadInfo{
     int* arr;
@@ -283,6 +282,7 @@ void swap(int* arr, int cur, int end){
         }
     }
 }
+
 void print_array(int* arr, int len){
     for(int i = 0; i < len; ++i){
         std::cout << arr[i] << " ";

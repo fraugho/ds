@@ -31,11 +31,11 @@ class NN{
     public:
         const double EULER = 2.71828182845904523536;
         std::vector<std::vector<Neuron>> layers;
-        int input_l, output_l;
+        int input, output;
 
         NN(int input, int output){
-            input_l = input;
-            output_l = output;
+            this->input = input;
+            this->output = output;
         }
 
         void fc(int layer, int width){
