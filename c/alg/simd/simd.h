@@ -1,6 +1,7 @@
-#ifndef SIMD_HPP
-#define SIMD_HPP
-#include <iostream>
+#ifndef SIMD_H
+#define SIMD_H
+#include <stdio.h>
+#include <stdlib.h>
 
 // Platform detection and SIMD headers
 #if defined(__aarch64__)
@@ -101,11 +102,11 @@ static inline simd_float simd_set1(float value) {
 }
 
 // Example: Vector addition with SIMD
-void vector_add_simd(const float* a, const float* b, float* result, std::size_t length) {
-    std::size_t simd_end = (length / SIMD_WIDTH) * SIMD_WIDTH;
+void vector_add_simd(const float* a, const float* b, float* result, size_t length) {
+    size_t simd_end = (length / SIMD_WIDTH) * SIMD_WIDTH;
     
     // SIMD loop
-    for (std::size_t i = 0; i < simd_end; i += SIMD_WIDTH) {
+    for (size_t i = 0; i < simd_end; i += SIMD_WIDTH) {
         simd_float vec_a = simd_load(&a[i]);
         simd_float vec_b = simd_load(&b[i]);
         simd_float vec_result = simd_add(vec_a, vec_b);
@@ -113,18 +114,18 @@ void vector_add_simd(const float* a, const float* b, float* result, std::size_t 
     }
     
     // Handle remaining elements
-    for (std::size_t i = simd_end; i < length; i++) {
+    for (size_t i = simd_end; i < length; i++) {
         result[i] = a[i] + b[i];
     }
 }
 
 // Example: Dot product with SIMD
-float dot_product_simd(const float* a, const float* b, std::size_t length) {
+float dot_product_simd(const float* a, const float* b, size_t length) {
     simd_float sum_vec = simd_set1(0.0f);
-    std::size_t simd_end = (length / SIMD_WIDTH) * SIMD_WIDTH;
+    size_t simd_end = (length / SIMD_WIDTH) * SIMD_WIDTH;
     
     // SIMD loop
-    for (std::size_t i = 0; i < simd_end; i += SIMD_WIDTH) {
+    for (size_t i = 0; i < simd_end; i += SIMD_WIDTH) {
         simd_float vec_a = simd_load(&a[i]);
         simd_float vec_b = simd_load(&b[i]);
         simd_float product = simd_mul(vec_a, vec_b);
@@ -158,7 +159,7 @@ float dot_product_simd(const float* a, const float* b, std::size_t length) {
 #endif
     
     // Handle remaining elements
-    for (std::size_t i = simd_end; i < length; i++) {
+    for (size_t i = simd_end; i < length; i++) {
         sum += a[i] * b[i];
     }
     
