@@ -6,173 +6,82 @@
 #include <cstdlib>
 #include <cstring>
 #include <immintrin.h>
+#include <type_traits>
 
-template<typename T>
-T** raw_matrix_alloc(const size_t rows, const size_t cols){
-    T** matrix = (int**)malloc(rows * sizeof(T *));
-    for(int i = 0; i < rows; ++i){
-        matrix[i] = (T*)malloc(cols * sizeof(T));
-        memset(matrix[i], 0, cols * sizeof(T));
+namespace Simd {
+
+    template<typename T>
+    T* raw_matrix_alloc(const size_t rows, const size_t cols) {
+        size_t size = rows * cols * sizeof(T);
+        T* matrix = (T*)aligned_alloc(64, size); 
+        if (matrix) std::memset(matrix, 0, size);
+        return matrix;
     }
-    return matrix;
-}
 
-template <typename T>
-class Matrix{
+    template <typename T>
+    class Matrix {
+        static_assert(std::is_arithmetic<T>::value, "Matrix type must be numeric");
     public:
         uint32_t cols;
         uint32_t rows;
-        T** data;
+        T* data;
 
-        Matrix(uint32_t rows, uint32_t cols){
-            this->rows = rows;
-            this->cols = cols;
+        Matrix(uint32_t rows, uint32_t cols) : rows(rows), cols(cols) {
             data = raw_matrix_alloc<T>(rows, cols);
-        };
-
-        ~Matrix(){
-            for(size_t i = 0; i < rows; ++i){
-                delete[] data[i];
-            }
         }
 
-        Matrix clone(){
-            Matrix<T> clone(rows, cols);
-            for(size_t i = 0; i < rows; ++i){
-                for(size_t j = 0; j < cols; ++j){
-                    clone.data[i][j] = data[i][j];
-                }
-            }
-            return clone;
+        ~Matrix() {
+            if (data) free(data);
         }
 
-        Matrix clone_scale(int scale){
-            Matrix<T> clone(rows, cols);
-            for(size_t i = 0; i < rows; ++i){
-                for(size_t j = 0; j < cols; ++j){
-                    clone.data[i][j] = data[i][j] * scale;
-                }
-            }
-            return clone;
-        }
+        T& at(uint32_t r, uint32_t c) { return data[r * cols + c]; }
 
-        Matrix<T>* operator*(Matrix<T>* const __restrict__ b){
-            if (cols == b->rows){
-                Matrix<T>* c = matrix_alloc( rows, b->cols);
-                for(int i = 0; i < rows; ++i){
-                    for(int j = 0; j < cols; ++j){
-                        for(int k = 0; k < b->cols; ++k){
-                            c->data[i][k] += data[i][j] * b->data[j][k];
+        Matrix<T>* operator*(Matrix<T>* const __restrict__ b) {
+            if (cols != b->rows) return nullptr;
+
+            Matrix<T>* res = new Matrix<T>(rows, b->cols);
+            uint32_t B_cols = b->cols;
+
+            for (uint32_t i = 0; i < rows; ++i) {
+                for (uint32_t j = 0; j < cols; ++j) {
+                    T a_val = data[i * cols + j];
+
+                    uint32_t k = 0;
+                    if constexpr (std::is_same_v<T, float>) {
+                        __m512 a_vec = _mm512_set1_ps(a_val);
+                        for (; k <= B_cols - 16; k += 16) {
+                            __m512 b_vec = _mm512_loadu_ps(&b->data[j * B_cols + k]);
+                            __m512 c_vec = _mm512_loadu_ps(&res->data[i * B_cols + k]);
+                            
+                            c_vec = _mm512_fmadd_ps(a_vec, b_vec, c_vec);
+                            
+                            _mm512_storeu_ps(&res->data[i * B_cols + k], c_vec);
+                        }
+                    } 
+                    else if constexpr (std::is_same_v<T, double>) {
+                        __m512d a_vec = _mm512_set1_pd(a_val);
+                        for (; k <= B_cols - 8; k += 8) {
+                            __m512d b_vec = _mm512_loadu_pd(&b->data[j * B_cols + k]);
+                            __m512d c_vec = _mm512_loadu_pd(&res->data[i * B_cols + k]);
+                            
+                            c_vec = _mm512_fmadd_pd(a_vec, b_vec, c_vec);
+                            
+                            _mm512_storeu_pd(&res->data[i * B_cols + k], c_vec);
                         }
                     }
-                }
-                return c;
-            }
-            else {
-                std::cout << "matrices not compatible\n";
-                return NULL;
-            }
-        }
 
-        Matrix operator*(const Matrix b){
-            std::cout << "not reccomended use matrix_mul fn\n";
-            if (cols == b.rows){
-                Matrix<T> c(rows, b.cols);
-                for(int i = 0; i < rows; ++i){
-                    for(int j = 0; j < cols; ++j){
-                        for(int k = 0; k < b.cols; ++k){
-                            c.data[i][k] += data[i][j] * b.data[j][k];
-                        }
+                    for (; k < B_cols; ++k) {
+                        res->data[i * B_cols + k] += a_val * b->data[j * B_cols + k];
                     }
                 }
-                return c;
             }
-            else {
-                std::cout << "matrices not compatible\n";
-                return Matrix<T>(1,1);
-            }
+            return res;
         }
+    };
 
-        Matrix operator*(int scalar){
-            return this->clone_scale(scalar);
-        }
-
-        void operator*=(int scalar){
-            for(size_t i = 0; i < rows; ++i){
-                for(size_t j = 0; j < rows; ++j){
-                    data[i][j] *= scalar;
-                }
-            }
-        }
-
-        void print_matrix(){
-            for(size_t i = 0; i < rows; ++i){
-                for(size_t j = 0; j < cols; ++j){
-                    std::cout << data[i][j] << "\t";
-                }
-                std::cout << "\n";
-            }
-        }
-    private:
-        Matrix<T>* matrix_alloc(uint32_t rows, uint32_t cols){
-            Matrix<T>* matrix = new Matrix<T>(rows, cols);
-            matrix->data = raw_matrix_alloc<T>(rows, cols);
-            return matrix;
-        }
-};
-
-template<typename T>
-Matrix<T>* matrix_alloc(uint32_t rows, uint32_t cols){
-    Matrix<T>* matrix = new Matrix<T>(rows, cols);
-    matrix->data = raw_matrix_alloc<T>(rows, cols);
-    return matrix;
-}
-
-
-template <typename T>
-Matrix<T>* matrix_mul(Matrix<T>* const __restrict__ a, Matrix<T>* const __restrict__ b){
-    if (a->cols == b->rows){
-        Matrix<T>* c = matrix_alloc<T>(a->rows, b->cols);
-        for(int i = 0; i < a->rows; ++i){
-            for(int j = 0; j < a->cols; ++j){
-                for(int k = 0; k < b->cols; ++k){
-                    c->data[i][k] += a->data[i][j] * b->data[j][k];
-                }
-            }
-        }
-        return c;
-    }
-    else {
-        std::cout << "matrices not compatible\n";
-        return NULL;
-    }
-}
-
-template <typename T>
-T** raw_matrix_dealloc(T** matrix, size_t rows, size_t cols){
-    for(size_t i = 0; i < rows; ++i){
-        free(matrix[i]);
-    }
-    return matrix;
-}
-
-template<typename T>
-T** raw_matrix_mul(const T **const __restrict__ a, const int **const __restrict__ b,
-        const int a_rows, const size_t a_cols, const size_t b_rows, const int b_cols) {
-    if (a_cols == b_rows){
-        T** c = raw_matrix_alloc<T>(a_rows, b_cols);
-        for(int i = 0; i < a_rows; ++i){
-            for(int j = 0; j < a_cols; ++j){
-                for(int k = 0; k < b_cols; ++k){
-                    c[i][k] += a[i][j] * b[j][k];
-                }
-            }
-        }
-        return c;
-    }
-    else {
-        printf("matrices not compatible\n");
-        return NULL;
+    template <typename T>
+    Matrix<T>* matrix_mul(Matrix<T>* const __restrict__ a, Matrix<T>* const __restrict__ b) {
+        return (*a) * b;
     }
 }
 
